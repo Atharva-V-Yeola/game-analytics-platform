@@ -1,0 +1,14 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "ball_label": "ball",
+  "person_label": "person",
+  "ball_conf_threshold": 0.75,
+  "person_conf_threshold": 0.5,
+  "frame_skip": 2,
+  "sets": 2,
+  "reps_per_set": 8,
+  "rest_time_seconds": 30,
+  "min_time_between_quadrants": 0.5,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

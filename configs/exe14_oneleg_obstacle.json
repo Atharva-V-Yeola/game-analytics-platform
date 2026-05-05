@@ -1,0 +1,18 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "sets_per_leg": 3,
+  "hold_time_seconds": 10,
+  "rest_time_seconds": 45,
+  "min_bounces": 3,
+  "min_cone_taps": 2,
+  "frame_skip": 2,
+  "ball_conf_threshold": 0.70,
+  "max_ball_lost_frames": 3,
+  "bounce_line_ratio": 0.85,
+  "balance_threshold": 0.05,
+  "visibility_threshold": 0.6,
+  "smoothing_window": 5,
+  "tolerance": 5,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

@@ -1,0 +1,17 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "sets": 4,
+  "bounces_per_zone": 5,
+  "rest_time_seconds": 105,
+  "calibration_secs": 3,
+  "crawl_line_factor": 1.45,
+  "crawl_min_dip_secs": 0.4,
+  "crawl_zone_x_start": 0.33,
+  "crawl_zone_x_end": 0.67,
+  "ball_conf": 0.55,
+  "person_conf": 0.50,
+  "bounce_line_ratio": 0.60,
+  "bounce_debounce": 0.5,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

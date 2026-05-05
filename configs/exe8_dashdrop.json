@@ -1,0 +1,18 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "person_label": "person",
+  "ball_label": "ball",
+  "conf_threshold": 0.5,
+  "use_tracking": true,
+  "inference_size": 640,
+  "device": "cpu",
+  "sets": 2,
+  "reps_per_set": 1,
+  "rest_time_seconds": 60,
+  "distance_meters": 15,
+  "start_line_ratio": 0.2,
+  "end_line_ratio": 0.8,
+  "position_tolerance": 50,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

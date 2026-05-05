@@ -1,0 +1,17 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "ball_label": "ball",
+  "sets_per_leg": 3,
+  "hold_time_seconds": 10,
+  "rest_time_seconds": 30,
+  "min_bounces": 3,
+  "balance_threshold": 0.05,
+  "frame_skip": 2,
+  "ball_conf_threshold": 0.70,
+  "max_ball_lost_frames": 3,
+  "bounce_line_ratio": 0.85,
+  "ball_min_area_ratio": 0.001,
+  "ball_max_area_ratio": 0.15,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

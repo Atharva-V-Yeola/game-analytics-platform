@@ -1,0 +1,10 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "sets": 3,
+  "reps_per_set": 10,
+  "pause_between_reps_seconds": 5,
+  "rest_between_sets_seconds": 60,
+  "yolo_conf_threshold": 0.5,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

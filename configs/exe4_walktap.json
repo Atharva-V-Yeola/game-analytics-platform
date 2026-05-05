@@ -1,0 +1,12 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "use_tracking": false,
+  "person_label": "person",
+  "ball_label": "ball",
+  "inference_size": 640,
+  "device": "cpu",
+  "region_left_ratio": 0.33,
+  "region_right_ratio": 0.67,
+  "sets": 2,
+  "rest_time_seconds": 60
+}

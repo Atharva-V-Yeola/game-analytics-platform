@@ -1,0 +1,16 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "sets": 3,
+  "reps_per_set": 12,
+  "rest_time_seconds": 75,
+  "ball_conf": 0.65,
+  "person_conf": 0.50,
+  "frame_skip": 2,
+  "max_ball_lost": 3,
+  "chest_line_ratio": 0.45,
+  "min_chest_cross_gap": 0.8,
+  "min_quad_gap": 0.4,
+  "visibility_thresh": 0.60,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

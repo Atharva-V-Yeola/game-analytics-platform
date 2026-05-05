@@ -1,0 +1,11 @@
+{
+  "sets_per_leg": 3,
+  "hold_time_seconds": 20,
+  "rest_time_seconds": 30,
+  "balance_threshold": 0.05,
+  "starting_leg": "LEFT",
+  "min_detection_confidence": 0.5,
+  "min_tracking_confidence": 0.5,
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

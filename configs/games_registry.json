@@ -1,0 +1,98 @@
+[
+  {
+    "id": "exe1",
+    "name": "YOLO Ball Counter",
+    "description": "Tracks balls crossing a line using YOLOv8",
+    "scriptPath": "games/exe1_yolo_ball.py"
+  },
+  {
+    "id": "exe2",
+    "name": "Balance Statue",
+    "description": "Single-leg balance hold with MediaPipe pose and TTS coaching",
+    "scriptPath": "games/exe2_balance.py"
+  },
+  {
+    "id": "exe3",
+    "name": "Hug & Push Toss",
+    "description": "YOLO ball drop detection with guided hug/push exercise sets",
+    "scriptPath": "games/exe3_hugpush.py"
+  },
+  {
+    "id": "exe4",
+    "name": "Walk & Tap Relay",
+    "description": "YOLO detection of person and ball in target regions",
+    "scriptPath": "games/exe4_walktap.py"
+  },
+  {
+    "id": "exe5",
+    "name": "Two-Person Ball Counter",
+    "description": "Tracks two players (left/right) passing a ball across a center line",
+    "scriptPath": "games/exe5_twoperson.py"
+  },
+  {
+    "id": "exe6",
+    "name": "Balance with Ball",
+    "description": "MediaPipe pose + YOLO ball tracking within a safety zone",
+    "scriptPath": "games/exe6_balanceball.py"
+  },
+  {
+    "id": "exe7",
+    "name": "Overhead Rainbow Toss",
+    "description": "YOLO quadrant-based sequence validation for rainbow tosses",
+    "scriptPath": "games/exe7_rainbow.py"
+  },
+  {
+    "id": "exe8",
+    "name": "Ball Dash & Drop",
+    "description": "Phase-based relay race tracking running to a bucket and dropping the ball",
+    "scriptPath": "games/exe8_dashdrop.py"
+  },
+  {
+    "id": "exe9",
+    "name": "Partner Colour Pass",
+    "description": "De Bruijn sequence guided ball passing with chest and bounce passes",
+    "scriptPath": "games/exe9_partnerpass.py"
+  },
+  {
+    "id": "exe10",
+    "name": "Bounce and Balance",
+    "description": "MediaPipe pose and YOLO ball tracking to count bounces while balancing on one leg",
+    "scriptPath": "games/exe10_bouncebalance.py"
+  },
+  {
+    "id": "exe11",
+    "name": "Rotational Toss",
+    "description": "MediaPipe pose and YOLO tracking for overhead rotational throw validation",
+    "scriptPath": "games/exe11_rotationtoss.py"
+  },
+  {
+    "id": "exe12",
+    "name": "Agility Maze Relay",
+    "description": "YOLO tracking for alternating zone bouncing",
+    "scriptPath": "games/exe12_maze_relay.py"
+  },
+  {
+    "id": "exe13",
+    "name": "Follow-the-Cue Pass",
+    "description": "Hash-based PRNG target color, YOLO ball tracking across 4 zones",
+    "scriptPath": "games/exe13_followcue.py"
+  },
+  {
+    "id": "exe14",
+    "name": "One-Leg Obstacle Bonus",
+    "description": "MediaPipe pose validation, YOLO ball tracking, and wrist cone tapping",
+    "scriptPath": "games/exe14_oneleg_obstacle.py"
+  },
+  {
+    "id": "exe15",
+    "name": "Combo Power Toss",
+    "description": "Sequence: chest throw -> overhead rainbow -> rotational toss",
+    "scriptPath": "games/exe15_combotoss.py"
+  },
+  {
+    "id": "exe16",
+    "name": "Obstacle Sprint Dash",
+    "description": "Relay sprint with cones, hurdles, and crawling zones",
+    "scriptPath": "games/exe16_sprintdash.py"
+  }
+]

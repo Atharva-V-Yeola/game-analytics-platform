@@ -1,0 +1,30 @@
+# Ultralytics training artifacts (never commit)
+runs/
+datasets/
+*.cache
+__pycache__/
+
+# Model weights (choose based on your option above)
+# Option A/B: Comment out the line below to track models/
+# Option C: Keep it to exclude models from git
+models/*.pt
+!models/.gitkeep
+
+# Python
+venv/
+.env
+
+# Data output
+data/*.csv
+!data/.gitkeep
+
+# Spring Boot
+backend/target/
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+.vscode/google-chrome-stable_current_amd64.deb

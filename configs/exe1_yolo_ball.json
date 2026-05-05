@@ -1,0 +1,21 @@
+{
+    "model_path": "models/all_in_one_yolov82/weights/best.pt",
+    "tracker": "bytetrack.yaml",
+    "line_x": 300,
+    "target_label": "ball",
+    "frame_skip": 1,
+    "frame_width": 640,
+    "frame_height": 480,
+    "inference_size": 640,
+    "device": "cpu",
+    "half": false,
+    "tts_rounds": 3,
+    "tts_break_seconds": 30,
+    "tts_count_words": [
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five"
+    ]
+}

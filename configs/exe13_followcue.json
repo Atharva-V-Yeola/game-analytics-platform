@@ -1,0 +1,11 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "sets": 4,
+  "passes_per_set": 6,
+  "rest_seconds": 30,
+  "seed": 42,
+  "cross_line_x": 320,
+  "tracker": "bytetrack.yaml",
+  "tts_rate": 160,
+  "tts_volume": 1.0
+}

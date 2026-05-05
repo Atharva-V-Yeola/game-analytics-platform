@@ -1,0 +1,13 @@
+{
+  "model_path": "models/all_in_one_yolov82/weights/best.pt",
+  "tracker": "bytetrack.yaml",
+  "target_label": "ball",
+  "drop_line_offset": 200,
+  "inference_size": 640,
+  "device": "cpu",
+  "sets": 2,
+  "reps": 5,
+  "hug_time_seconds": 5,
+  "push_time_seconds": 5,
+  "rest_time_seconds": 45
+}

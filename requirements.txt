@@ -1,0 +1,18 @@
+# Python dependencies for Game Analytics Platform
+# Install via: pip install -r requirements.txt  (or use install.py)
+
+# Computer Vision
+opencv-python>=4.8.0
+
+# YOLO object detection & tracking
+ultralytics>=8.0.0
+
+# Data handling
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Text-to-speech coaching (optional — gracefully skipped if unavailable)
+pyttsx3>=2.90
+
+# Pose tracking
+mediapipe==0.10.14
