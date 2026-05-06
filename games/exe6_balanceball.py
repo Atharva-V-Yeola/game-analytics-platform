@@ -600,7 +600,10 @@ def open_camera(camera_id):
     """Cross-platform camera/video opening."""
     if camera_id.isdigit():
         idx = int(camera_id)
-        cap = cv2.VideoCapture(idx)
+        if platform.system() == "Windows":
+            cap = cv2.VideoCapture(idx, cv2.CAP_DSHOW)
+        else:
+            cap = cv2.VideoCapture(idx)
         if not cap.isOpened() and platform.system() == "Linux":
             cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
     else:

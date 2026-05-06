@@ -15,4 +15,4 @@ numpy>=1.24.0
 pyttsx3>=2.90
 
 # Pose tracking
-mediapipe==0.10.14
+mediapipe>=0.10.14

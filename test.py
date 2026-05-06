@@ -72,4 +72,19 @@ except ImportError:
     print("FAIL: ultralytics not installed")
     print("Fix: pip install ultralytics")
 
+# Test 5: MediaPipe
+print("\n--- TEST 5: MediaPipe ---")
+try:
+    import mediapipe as mp
+    print(f"OK: mediapipe {mp.__version__} installed")
+    # Quick init test
+    pose = mp.solutions.pose.Pose(static_image_mode=True)
+    pose.close()
+    print("OK: MediaPipe Pose initialized successfully")
+except ImportError:
+    print("FAIL: mediapipe not installed")
+    print("Fix: pip install mediapipe")
+except Exception as e:
+    print(f"FAIL: MediaPipe initialization failed: {e}")
+
 print("\n--- END ---")
