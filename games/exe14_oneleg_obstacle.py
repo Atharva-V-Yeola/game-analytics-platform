@@ -135,24 +135,22 @@ def tts_worker(config):
         except ImportError:
             pass
 
-    tts_driver = config.get("tts_driver")
-    rate = config.get("tts_rate", 160)
-    volume = config.get("tts_volume", 1.0)
+    # Initialize engine ONCE for the lifetime of this thread
+    engine = init_tts(config.get("tts_driver"))
+    if engine is None:
+        log_event("WARN", "TTS engine unavailable")
+        return
+
+    engine.setProperty('rate', config.get("tts_rate", 160))
+    engine.setProperty('volume', config.get("tts_volume", 1.0))
 
     while not stop_event.is_set():
         try:
             msg = tts_queue.get(timeout=0.5)
             if msg == "__STOP__":
                 break
-            # Re-init engine per utterance to prevent COM/SAPI5 deadlock on Windows
-            engine = init_tts(tts_driver)
-            if engine:
-                engine.setProperty('rate', rate)
-                engine.setProperty('volume', volume)
-                engine.say(msg)
-                engine.runAndWait()
-                engine.stop()
-                del engine
+            engine.say(msg)
+            engine.runAndWait()
         except queue.Empty:
             continue
         except Exception as e:
