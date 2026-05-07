@@ -87,4 +87,45 @@ except ImportError:
 except Exception as e:
     print(f"FAIL: MediaPipe initialization failed: {e}")
 
+# Test 6: Protobuf compatibility
+print("\n--- TEST 6: Protobuf ---")
+try:
+    import google.protobuf
+    ver = google.protobuf.__version__
+    major = int(ver.split('.')[0])
+    if major >= 5:
+        print(f"WARN: protobuf {ver} may conflict with mediapipe (needs <5)")
+        print("Fix: pip install 'protobuf>=4.25.3,<5'")
+    else:
+        print(f"OK: protobuf {ver} (compatible with mediapipe)")
+except ImportError:
+    print("FAIL: protobuf not installed")
+
+# Test 7: Windows COM support (pywin32)
+print("\n--- TEST 7: Windows COM (pywin32) ---")
+if platform.system() == "Windows":
+    try:
+        import pythoncom
+        print("OK: pywin32/pythoncom available (COM-safe TTS enabled)")
+    except ImportError:
+        print("WARN: pywin32 not installed — TTS may freeze with MediaPipe games")
+        print("Fix: pip install pywin32")
+else:
+    print("SKIP: Not on Windows (COM not needed)")
+
+# Test 8: pyttsx3 TTS
+print("\n--- TEST 8: pyttsx3 TTS ---")
+try:
+    import pyttsx3
+    engine = pyttsx3.init()
+    engine.stop()
+    del engine
+    print("OK: pyttsx3 initialized successfully")
+except ImportError:
+    print("WARN: pyttsx3 not installed — TTS coaching will be disabled")
+    print("Fix: pip install pyttsx3")
+except Exception as e:
+    print(f"WARN: pyttsx3 init failed: {e}")
+    print("Fix: TTS coaching will be disabled but games will still work")
+
 print("\n--- END ---")

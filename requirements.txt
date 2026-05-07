@@ -16,3 +16,10 @@ pyttsx3>=2.90
 
 # Pose tracking
 mediapipe>=0.10.14
+
+# Protobuf pinned to range compatible with both mediapipe and ultralytics
+protobuf>=4.25.3,<5
+
+# Windows COM threading support (needed for pyttsx3 + MediaPipe thread safety)
+# Gracefully unused on Linux/Mac
+pywin32>=306; sys_platform == "win32"

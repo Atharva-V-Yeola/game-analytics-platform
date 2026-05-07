@@ -121,32 +121,49 @@ def init_tts(driver=None):
 
 
 def tts_worker(config):
-    """Dedicated TTS thread — non-blocking."""
+    """Dedicated TTS thread — non-blocking. COM-safe for Windows."""
     if not TTS_AVAILABLE:
         log_event("INFO", "TTS not available")
         return
 
-    engine = init_tts(config.get("tts_driver"))
-    if engine is None:
-        log_event("WARN", "TTS engine unavailable")
-        return
+    # Windows COM requires explicit per-thread initialization
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoInitialize()
+        except ImportError:
+            pass
 
+    tts_driver = config.get("tts_driver")
     rate = config.get("tts_rate", 160)
     volume = config.get("tts_volume", 1.0)
-    engine.setProperty('rate', rate)
-    engine.setProperty('volume', volume)
 
     while not stop_event.is_set():
         try:
             msg = tts_queue.get(timeout=0.5)
             if msg == "__STOP__":
                 break
-            engine.say(msg)
-            engine.runAndWait()
+            # Re-init engine per utterance to prevent COM/SAPI5 deadlock on Windows
+            engine = init_tts(tts_driver)
+            if engine:
+                engine.setProperty('rate', rate)
+                engine.setProperty('volume', volume)
+                engine.say(msg)
+                engine.runAndWait()
+                engine.stop()
+                del engine
         except queue.Empty:
             continue
         except Exception as e:
             log_event("ERROR", f"TTS error: {e}")
+
+    # Windows COM cleanup
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoUninitialize()
+        except ImportError:
+            pass
 
     log_event("CLEANUP", "TTS thread ended")
 
@@ -269,6 +286,7 @@ def vision_loop(args, config):
 
     setup_mode = not args.headless
     setup_complete = False
+    setup_start_time = time.time()
 
     log_event("READY", "Bounce and Balance active", {
         "sets_per_leg": sets_per_leg,
@@ -297,6 +315,14 @@ def vision_loop(args, config):
 
                 # Setup Mode
                 if setup_mode and not setup_complete:
+                    # Auto-start after 5 seconds (for backend-launched processes)
+                    if time.time() - setup_start_time >= 5:
+                        setup_mode = False
+                        setup_complete = True
+                        tts_queue.put("Auto-starting. Balance on one leg and bounce the ball.")
+                        time.sleep(2)
+                        continue
+
                     draw_setup_guide(frame, bounce_line_ratio)
                     cv2.imshow(args.game_id, frame)
                     key = cv2.waitKey(1) & 0xFF

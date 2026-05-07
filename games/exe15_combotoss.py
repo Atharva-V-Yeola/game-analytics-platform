@@ -121,32 +121,49 @@ def init_tts(driver=None):
 
 
 def tts_worker(config):
-    """Dedicated TTS thread — non-blocking."""
+    """Dedicated TTS thread — non-blocking. COM-safe for Windows."""
     if not TTS_AVAILABLE:
         log_event("INFO", "TTS not available")
         return
 
-    engine = init_tts(config.get("tts_driver"))
-    if engine is None:
-        log_event("WARN", "TTS engine unavailable")
-        return
+    # Windows COM requires explicit per-thread initialization
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoInitialize()
+        except ImportError:
+            pass
 
+    tts_driver = config.get("tts_driver")
     rate = config.get("tts_rate", 160)
     volume = config.get("tts_volume", 1.0)
-    engine.setProperty('rate', rate)
-    engine.setProperty('volume', volume)
 
     while not stop_event.is_set():
         try:
             msg = tts_queue.get(timeout=0.5)
             if msg == "__STOP__":
                 break
-            engine.say(msg)
-            engine.runAndWait()
+            # Re-init engine per utterance to prevent COM/SAPI5 deadlock on Windows
+            engine = init_tts(tts_driver)
+            if engine:
+                engine.setProperty('rate', rate)
+                engine.setProperty('volume', volume)
+                engine.say(msg)
+                engine.runAndWait()
+                engine.stop()
+                del engine
         except queue.Empty:
             continue
         except Exception as e:
             log_event("ERROR", f"TTS error: {e}")
+
+    # Windows COM cleanup
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoUninitialize()
+        except ImportError:
+            pass
 
     log_event("CLEANUP", "TTS thread ended")
 
@@ -516,6 +533,7 @@ def vision_loop(args, config):
     mp_drawing = mp.solutions.drawing_utils
 
     setup_mode = not args.headless
+    setup_start_time = time.time()
     cur_set = 1
     cur_rep = 0
     in_rest = False
@@ -553,6 +571,12 @@ def vision_loop(args, config):
                 frame_ref[0] = frame
 
                 if setup_mode:
+                    # Auto-start after 5 seconds (for backend-launched processes)
+                    if time.time() - setup_start_time >= 5:
+                        setup_mode = False
+                        tts_queue.put("Starting set 1. First: chest throw, then rainbow, then rotational. Go!")
+                        continue
+
                     if not args.headless:
                         cv2.putText(frame, "COMBO POWER TOSS - SETUP", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 255), 2)
                         lines = [

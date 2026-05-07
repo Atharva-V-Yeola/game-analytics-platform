@@ -202,3 +202,34 @@ Once the installer finishes successfully, you will never need to run `install.py
 *   `games/` - The core Python AI tracking scripts (one per exercise).
 *   `models/` - Pre-trained YOLO weights (`.pt` / `.onnx`).
 *   `venv/` - Isolated Python environment (generated during install).
+
+---
+
+## 🪟 Windows-Specific Notes
+
+### Camera Access
+All games automatically use the **DirectShow** (`CAP_DSHOW`) backend on Windows for optimal webcam performance. No configuration is needed.
+
+### Text-to-Speech (TTS) Threading
+Games that use **MediaPipe** (exercises 2, 6, 10, 11, 14, 15, 16) include a COM-safe TTS implementation. On Windows, the `pyttsx3` library uses **SAPI5** (COM-based), which requires explicit per-thread COM initialization when running alongside MediaPipe inference. This is handled automatically — no user action needed.
+
+### Setup Screen Auto-Start
+Games with interactive setup screens (exercises 6, 10, 14, 15, 16) will **auto-start after 5 seconds** if no keyboard input is detected. This ensures games launched from the web dashboard don't hang waiting for a key press. You can still press `'s'` manually if you prefer to control the setup timing.
+
+### Python Dependencies
+The `requirements.txt` includes `pywin32` (Windows only) for COM thread safety. This is installed automatically by `install.py` and is silently skipped on Linux/Mac.
+
+---
+
+## 🔧 Troubleshooting
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| **Game not responding** (MediaPipe games) | `protobuf` version conflict | Run `pip install protobuf>=4.25.3,<5` in your venv |
+| **No camera feed** | Camera in use by another app | Close other apps using the webcam (Zoom, Teams, etc.) |
+| **"Java not found"** during install | Java not on PATH | Reinstall Java 17 and check **"Add to PATH"** |
+| **"Python not found"** during install | Python not on PATH | Reinstall Python and check **"Add python.exe to PATH"** |
+| **Game window doesn't appear** | `game.headless=true` in properties | Edit `backend/src/main/resources/application.properties` and set `game.headless=false` |
+| **TTS not speaking** | `pyttsx3` or `pywin32` missing | Run `pip install pyttsx3 pywin32` in your venv |
+| **Port 8080 already in use** | Another app using the port | Close the other app or change `server.port` in `application.properties` |
+

@@ -28,8 +28,9 @@ except ImportError:
 try:
     import mediapipe as mp
     MEDIAPIPE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     MEDIAPIPE_AVAILABLE = False
+    print(f"MEDIAPIPE IMPORT ERROR: {e}", file=sys.stderr)
 
 
 # =============================================================================
@@ -93,34 +94,65 @@ def load_config(config_path):
 # TTS THREAD (Non-blocking)
 # =============================================================================
 
-def tts_worker(config):
+def tts_worker(args, config):
     """
     CHANGE: TTS runs in dedicated thread so vision loop never blocks.
     Vision loop puts messages in tts_queue; this thread speaks them.
+    FIX: Re-init engine per utterance to prevent COM/SAPI5 deadlock on Windows.
     """
-    if not TTS_AVAILABLE:
-        log_event("INFO", "TTS not available")
+    if args.headless or not TTS_AVAILABLE:
+        log_event("INFO", "TTS skipped (headless or unavailable)")
         return
 
-    engine = pyttsx3.init()
-    engine.setProperty('rate', config.get("tts_rate", 160))
-    engine.setProperty('volume', config.get("tts_volume", 1.0))
+    # Windows COM requires explicit per-thread initialization
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoInitialize()
+        except ImportError:
+            pass
+
+    tts_rate = config.get("tts_rate", 160)
+    tts_volume = config.get("tts_volume", 1.0)
 
     # CHANGE: Speak initial message
-    engine.say("Balance game started. Get ready on your left leg.")
-    engine.runAndWait()
+    try:
+        engine = pyttsx3.init()
+        engine.setProperty('rate', tts_rate)
+        engine.setProperty('volume', tts_volume)
+        engine.say("Balance game started. Get ready on your left leg.")
+        engine.runAndWait()
+        engine.stop()
+        del engine
+    except Exception as e:
+        log_event("ERROR", f"TTS initial message error: {e}")
 
     while not stop_event.is_set():
         try:
             msg = tts_queue.get(timeout=0.5)
             if msg == "__STOP__":
                 break
-            engine.say(msg)
-            engine.runAndWait()
+            # Re-init engine per utterance to prevent COM/SAPI5 deadlock on Windows
+            try:
+                engine = pyttsx3.init()
+                engine.setProperty('rate', tts_rate)
+                engine.setProperty('volume', tts_volume)
+                engine.say(msg)
+                engine.runAndWait()
+                engine.stop()
+                del engine
+            except Exception as e:
+                log_event("ERROR", f"TTS utterance error: {e}")
         except queue.Empty:
             continue
-        except Exception as e:
-            log_event("ERROR", f"TTS error: {e}")
+
+    # Windows COM cleanup
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoUninitialize()
+        except ImportError:
+            pass
 
     log_event("CLEANUP", "TTS thread ended")
 
@@ -349,7 +381,7 @@ Examples:
     })
 
     # CHANGE: Launch TTS thread first
-    tts_thread = threading.Thread(target=tts_worker, args=(config,))
+    tts_thread = threading.Thread(target=tts_worker, args=(args, config))
     tts_thread.start()
 
     # CHANGE: Run vision loop in main thread

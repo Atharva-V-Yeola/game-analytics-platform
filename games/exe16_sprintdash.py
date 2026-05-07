@@ -121,32 +121,49 @@ def init_tts(driver=None):
 
 
 def tts_worker(config):
-    """Dedicated TTS thread — non-blocking."""
+    """Dedicated TTS thread — non-blocking. COM-safe for Windows."""
     if not TTS_AVAILABLE:
         log_event("INFO", "TTS not available")
         return
 
-    engine = init_tts(config.get("tts_driver"))
-    if engine is None:
-        log_event("WARN", "TTS engine unavailable")
-        return
+    # Windows COM requires explicit per-thread initialization
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoInitialize()
+        except ImportError:
+            pass
 
+    tts_driver = config.get("tts_driver")
     rate = config.get("tts_rate", 160)
     volume = config.get("tts_volume", 1.0)
-    engine.setProperty('rate', rate)
-    engine.setProperty('volume', volume)
 
     while not stop_event.is_set():
         try:
             msg = tts_queue.get(timeout=0.5)
             if msg == "__STOP__":
                 break
-            engine.say(msg)
-            engine.runAndWait()
+            # Re-init engine per utterance to prevent COM/SAPI5 deadlock on Windows
+            engine = init_tts(tts_driver)
+            if engine:
+                engine.setProperty('rate', rate)
+                engine.setProperty('volume', volume)
+                engine.say(msg)
+                engine.runAndWait()
+                engine.stop()
+                del engine
         except queue.Empty:
             continue
         except Exception as e:
             log_event("ERROR", f"TTS error: {e}")
+
+    # Windows COM cleanup
+    if platform.system() == "Windows":
+        try:
+            import pythoncom
+            pythoncom.CoUninitialize()
+        except ImportError:
+            pass
 
     log_event("CLEANUP", "TTS thread ended")
 
@@ -471,6 +488,7 @@ def vision_loop(args, config):
     mp_drawing = mp.solutions.drawing_utils
 
     setup_mode    = not args.headless
+    setup_start_time = time.time()
     calibrating   = False
     calib_start   = 0.0
     nose_samples  = []
@@ -530,6 +548,13 @@ def vision_loop(args, config):
                 pose_landmarks = pose_results.pose_landmarks
 
                 if setup_mode:
+                    # Auto-trigger calibration after 5 seconds (for backend-launched processes)
+                    if not calibrating and time.time() - setup_start_time >= 5:
+                        calibrating  = True
+                        calib_start  = time.time()
+                        nose_samples = []
+                        tts_queue.put("Auto-calibrating. Stand still, looking forward.")
+
                     if not args.headless:
                         calib_progress = 0.0
                         nose_y_avg = None
@@ -560,8 +585,8 @@ def vision_loop(args, config):
                                     tts_queue.put("Could not detect face. Stand closer and try again.")
                                     calibrating  = False
                                     nose_samples = []
-                            else:
-                                nose_y_avg = float(np.mean(nose_samples)) if nose_samples else None
+                        else:
+                            nose_y_avg = float(np.mean(nose_samples)) if nose_samples else None
 
                         if pose_landmarks:
                             mp_drawing.draw_landmarks(
@@ -583,6 +608,35 @@ def vision_loop(args, config):
                         elif key == ord('q'):
                             stop_event.set()
                             break
+                    else:
+                        # Headless calibration path (auto-triggered)
+                        if calibrating:
+                            elapsed_c = time.time() - calib_start
+                            if pose_landmarks:
+                                PL = mp_pose.PoseLandmark
+                                nose = pose_landmarks.landmark[PL.NOSE]
+                                if nose.visibility >= 0.55:
+                                    nose_samples.append(nose.y * fh)
+                            if elapsed_c >= calibration_secs:
+                                if len(nose_samples) >= 5:
+                                    nose_baseline = float(np.mean(nose_samples))
+                                    crawl_line_y  = int(nose_baseline * crawl_line_factor)
+                                    bounce = BounceZoneDetector(fw, fh, config)
+                                    crawl  = CrawlDetector(crawl_line_y, fw, config)
+                                    setup_mode  = False
+                                    calibrating = False
+                                    tts_queue.put("Calibration complete. Crawl line set. Starting set 1. Go!")
+                                    log_event("CALIBRATION", "Complete", {"nose_baseline": nose_baseline, "crawl_line": crawl_line_y})
+                                else:
+                                    # Fallback: use default nose baseline
+                                    nose_baseline = int(fh * 0.3)
+                                    crawl_line_y  = int(nose_baseline * crawl_line_factor)
+                                    bounce = BounceZoneDetector(fw, fh, config)
+                                    crawl  = CrawlDetector(crawl_line_y, fw, config)
+                                    setup_mode  = False
+                                    calibrating = False
+                                    tts_queue.put("Using default calibration. Starting set 1. Go!")
+                                    log_event("CALIBRATION", "Default fallback", {"nose_baseline": nose_baseline})
                     continue
 
                 if in_rest:
