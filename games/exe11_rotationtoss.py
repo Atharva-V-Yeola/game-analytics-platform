@@ -121,47 +121,48 @@ def init_tts(driver=None):
 
 
 def tts_worker(config):
-    """Dedicated TTS thread — non-blocking. COM-safe for Windows."""
+    """
+    TTS runs in a dedicated thread.
+    On Windows, it completely bypasses pyttsx3 and uses a PowerShell subprocess
+    to prevent COM/SAPI5 deadlocks with MediaPipe.
+    """
     if not TTS_AVAILABLE:
         log_event("INFO", "TTS not available")
         return
 
-    # Windows COM requires explicit per-thread initialization
-    if platform.system() == "Windows":
-        try:
-            import pythoncom
-            pythoncom.CoInitialize()
-        except ImportError:
-            pass
+    is_windows = platform.system() == "Windows"
+    engine = None
 
-    # Initialize engine ONCE for the lifetime of this thread
-    engine = init_tts(config.get("tts_driver"))
-    if engine is None:
-        log_event("WARN", "TTS engine unavailable")
-        return
-
-    engine.setProperty('rate', config.get("tts_rate", 160))
-    engine.setProperty('volume', config.get("tts_volume", 1.0))
+    # Only initialize pyttsx3 on Linux/Mac
+    if not is_windows:
+        engine = init_tts(config.get("tts_driver"))
+        if engine:
+            engine.setProperty('rate', config.get("tts_rate", 160))
+            engine.setProperty('volume', config.get("tts_volume", 1.0))
 
     while not stop_event.is_set():
         try:
             msg = tts_queue.get(timeout=0.5)
             if msg == "__STOP__":
                 break
-            engine.say(msg)
-            engine.runAndWait()
+            
+            safe_msg = msg.replace("'", "")
+            
+            if is_windows:
+                import subprocess
+                cmd = f"Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Rate = 1; $s.Speak('{safe_msg}')"
+                try:
+                    subprocess.Popen(["powershell", "-Command", cmd], creationflags=0x08000000)
+                except Exception as e:
+                    log_event("ERROR", f"PowerShell TTS error: {e}")
+            else:
+                if engine:
+                    engine.say(msg)
+                    engine.runAndWait()
         except queue.Empty:
             continue
         except Exception as e:
             log_event("ERROR", f"TTS error: {e}")
-
-    # Windows COM cleanup
-    if platform.system() == "Windows":
-        try:
-            import pythoncom
-            pythoncom.CoUninitialize()
-        except ImportError:
-            pass
 
     log_event("CLEANUP", "TTS thread ended")
 
