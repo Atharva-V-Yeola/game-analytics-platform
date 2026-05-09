@@ -98,6 +98,27 @@ def load_config(config_path):
 # TTS THREAD (Non-blocking)
 # =============================================================================
 
+def init_tts(driver=None):
+    if not TTS_AVAILABLE:
+        return None
+    try:
+        if driver:
+            return pyttsx3.init(driver)
+        return pyttsx3.init()
+    except Exception as e:
+        log_event("WARN", f"TTS init failed: {e}")
+        try:
+            plat = platform.system()
+            if plat == 'Windows':
+                return pyttsx3.init('sapi5')
+            elif plat == 'Darwin':
+                return pyttsx3.init('nsss')
+            else:
+                return pyttsx3.init('espeak')
+        except Exception as e2:
+            log_event("ERROR", f"TTS init failed completely: {e2}")
+            return None
+
 def tts_worker(args, config):
     """
     TTS runs in a dedicated thread so the vision loop never blocks.
