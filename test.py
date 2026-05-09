@@ -77,6 +77,11 @@ print("\n--- TEST 5: MediaPipe ---")
 try:
     import mediapipe as mp
     print(f"OK: mediapipe {mp.__version__} installed")
+    # Check if mp.solutions is available (may need shim for 0.10.14+)
+    if not hasattr(mp, 'solutions'):
+        import mediapipe.python.solutions as _solutions
+        mp.solutions = _solutions
+        print("INFO: Applied mp.solutions compatibility shim (mediapipe 0.10.14+)")
     # Quick init test
     pose = mp.solutions.pose.Pose(static_image_mode=True)
     pose.close()

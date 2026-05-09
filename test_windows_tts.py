@@ -29,6 +29,11 @@ except ImportError as e:
 print("\n[TEST 2] MediaPipe Pose init...")
 try:
     import mediapipe as mp
+    # Compatibility shim for mediapipe 0.10.14+
+    if not hasattr(mp, 'solutions'):
+        import mediapipe.python.solutions as _solutions
+        mp.solutions = _solutions
+        print("  INFO: Applied mp.solutions compatibility shim")
     mp_pose = mp.solutions.pose
     pose = mp_pose.Pose(static_image_mode=True)
     pose.close()

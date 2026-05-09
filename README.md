@@ -226,6 +226,7 @@ The `requirements.txt` includes `pywin32` (Windows only) for COM thread safety. 
 | Problem | Cause | Solution |
 |---------|-------|----------|
 | **Game not responding** (MediaPipe games) | `protobuf` version conflict | Run `pip install protobuf>=4.25.3,<5` in your venv |
+| **`AttributeError: module 'mediapipe' has no attribute 'solutions'`** | Newer mediapipe (0.10.14+) changed the API | Already handled automatically by a compatibility shim in each game script |
 | **No camera feed** | Camera in use by another app | Close other apps using the webcam (Zoom, Teams, etc.) |
 | **"Java not found"** during install | Java not on PATH | Reinstall Java 17 and check **"Add to PATH"** |
 | **"Python not found"** during install | Python not on PATH | Reinstall Python and check **"Add python.exe to PATH"** |
